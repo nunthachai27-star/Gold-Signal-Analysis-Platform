@@ -1,0 +1,519 @@
+# Top Level Specification
+
+## ระบบวิเคราะห์ XAUUSD หลาย Timeframe และส่งสัญญาณอัตโนมัติ
+
+### 1. ชื่อระบบ
+
+**Gold Signal Analysis Platform**
+ระบบวิเคราะห์ราคาทองคำ XAUUSD แบบหลาย Timeframe และส่งผลวิเคราะห์อัตโนมัติไปยังผู้ใช้งานผ่าน Telegram / LINE
+
+---
+
+### 2. วัตถุประสงค์ของระบบ
+
+พัฒนาระบบที่สามารถรับข้อมูลราคาหรือสัญญาณจาก TradingView / Data Feed ภายนอก นำมาวิเคราะห์ร่วมกันหลาย Timeframe แล้วสรุปเป็นคำแนะนำการเทรดในรูปแบบที่ใช้งานได้ทันที เช่น
+
+* BUY / SELL
+* Entry
+* Stop Loss
+* Take Profit 1
+* Take Profit 2
+* Win Probability ของฝั่ง BUY และ SELL
+* สถานะภาพรวม เช่น Scalp / Normal / Big Frame
+
+โดยระบบต้องสามารถส่งผลวิเคราะห์ให้ผู้ใช้งานแบบอัตโนมัติและรวดเร็วผ่านช่องทางแจ้งเตือนที่กำหนด
+
+---
+
+### 3. ขอบเขตของระบบ
+
+ระบบครอบคลุมการทำงานดังนี้
+
+1. รับข้อมูลราคาหรือ Alert จาก TradingView ผ่าน Webhook
+2. รับข้อมูลราคาแบบ Real-time หรือ Near Real-time จากแหล่งข้อมูลที่กำหนด
+3. วิเคราะห์ข้อมูลราคาหลาย Timeframe ได้แก่
+
+   * W1
+   * D1
+   * H4
+   * H1
+   * M30
+   * M15
+   * M5
+   * M1
+4. คำนวณแนวโน้ม โครงสร้างราคา แนวรับ แนวต้าน และโมเมนตัม
+5. สรุปผลเป็นแผนเทรดแบบเลขจุดเดียว
+6. ส่งข้อความแจ้งเตือนอัตโนมัติไปยัง Telegram / LINE
+7. บันทึกประวัติการวิเคราะห์และผลลัพธ์
+8. แสดง Dashboard สำหรับตรวจสอบสัญญาณย้อนหลังและสถิติความแม่นยำ
+
+---
+
+### 4. เป้าหมายทางธุรกิจ
+
+* ลดเวลาการเฝ้ากราฟของผู้ใช้งาน
+* เพิ่มความสม่ำเสมอของการวิเคราะห์
+* เปลี่ยนการตัดสินใจจากการมองกราฟแบบ manual เป็นกฎเชิงระบบ
+* เก็บสถิติผลลัพธ์เพื่อพัฒนาความแม่นยำของระบบในระยะยาว
+* รองรับการต่อยอดเป็นระบบสมาชิกหรือบริการเชิงพาณิชย์ได้ในอนาคต
+
+---
+
+### 5. ผู้ใช้งานหลัก
+
+1. **Trader / Owner**
+
+   * รับสัญญาณ
+   * ดูผลวิเคราะห์
+   * ดูสถิติย้อนหลัง
+
+2. **Admin**
+
+   * กำหนดค่า Timeframe
+   * กำหนดสูตรวิเคราะห์
+   * กำหนดช่องทางแจ้งเตือน
+   * ตรวจสอบสถานะระบบ
+
+3. **Developer / Analyst**
+
+   * ปรับกฎการวิเคราะห์
+   * ตรวจสอบ log
+   * วิเคราะห์ผล win/loss ของสัญญาณ
+
+---
+
+### 6. ภาพรวมการทำงานของระบบ
+
+#### 6.1 Flow หลัก
+
+1. TradingView หรือ Data Feed ส่งข้อมูลเข้าระบบผ่าน Webhook/API
+2. ระบบรับข้อมูลและตรวจสอบความถูกต้อง
+3. ระบบโหลดข้อมูลราคาของหลาย Timeframe ที่เกี่ยวข้อง
+4. Analysis Engine ประมวลผล
+
+   * Trend Analysis
+   * Structure Analysis
+   * Support/Resistance
+   * Indicator Confirmation
+   * Signal Scoring
+5. Signal Generator สรุปผลเป็น Entry / SL / TP / Probability
+6. Notification Engine ส่งผลไปยัง Telegram / LINE
+7. ระบบบันทึกผลลงฐานข้อมูล
+8. Dashboard แสดงผลย้อนหลัง
+
+---
+
+### 7. ความสามารถหลักของระบบ
+
+#### 7.1 Data Ingestion
+
+* รับ Webhook จาก TradingView
+* รับข้อมูลจาก REST API / Price Feed
+* รองรับ JSON Payload
+* รองรับ Secret Token เพื่อยืนยันแหล่งที่มา
+
+#### 7.2 Market Analysis
+
+* วิเคราะห์แนวโน้มหลักจาก H4 / D1 / W1
+* วิเคราะห์จุดเข้าออกจาก H1 / M30 / M15 / M5 / M1
+* คำนวณแนวรับแนวต้านสำคัญ
+* ตรวจจับ Breakout / Rejection / Pullback / Retest
+* ประมวลผล Indicator เช่น
+
+  * EMA / MA
+  * RSI
+  * MACD
+  * ATR
+  * Volume (ถ้ามี)
+
+#### 7.3 Signal Generation
+
+ระบบต้องสรุปผลในรูปแบบมาตรฐาน เช่น
+
+* BUY 4672
+* SL 4666
+* TP1 4679
+* TP2 4688
+* BUY win probability: 59%
+* SELL win probability: 41%
+
+โดยต้องสามารถแยกประเภทสัญญาณได้ เช่น
+
+* Scalp
+* Normal
+* Big Frame
+
+#### 7.4 Notification
+
+* ส่งข้อความไป Telegram Bot
+* ส่งข้อความไป LINE Messaging API
+* รองรับการส่งซ้ำเมื่อเกิดเงื่อนไขใหม่
+* รองรับการกำหนดผู้รับหลายคน
+* รองรับการใส่ Tag เช่น
+
+  * XAUUSD
+  * Scalp
+  * High Confidence
+  * Breakdown
+  * Rebound
+
+#### 7.5 Dashboard
+
+* แสดงสัญญาณล่าสุด
+* แสดงประวัติย้อนหลัง
+* แสดงผล win/loss
+* แสดงอัตราความแม่นยำ
+* แสดงกราฟสรุปผลรายวัน / รายสัปดาห์ / รายเดือน
+* Filter ตาม timeframe, signal type, date range
+
+---
+
+### 8. กฎการวิเคราะห์ระดับสูง
+
+#### 8.1 Trend Layer
+
+ใช้ Timeframe ใหญ่เพื่อกำหนด bias หลัก
+
+* W1 / D1 = แนวโน้มใหญ่
+* H4 / H1 = แนวโน้มกลาง
+* M30 / M15 / M5 / M1 = ใช้หาจุดเข้า
+
+#### 8.2 Signal Priority
+
+1. ตรวจแนวโน้มหลัก
+2. ตรวจโครงสร้างราคา
+3. ตรวจแนวรับแนวต้าน
+4. ตรวจโมเมนตัมจาก indicator
+5. ให้คะแนนฝั่ง BUY / SELL
+6. เลือกฝั่งที่คะแนนสูงกว่า
+7. สร้าง Entry / SL / TP จากโครงสร้างราคา
+
+#### 8.3 Confidence Score
+
+ระบบควรคำนวณคะแนนความมั่นใจ เช่น 0–100
+แล้วแปลงเป็น
+
+* BUY win probability
+* SELL win probability
+
+ตัวอย่างปัจจัยที่ใช้:
+
+* Trend alignment
+* RSI position
+* MACD direction
+* Distance to support/resistance
+* Candle confirmation
+* Breakout / rejection quality
+* ATR volatility
+
+---
+
+### 9. รูปแบบข้อความแจ้งเตือน
+
+#### 9.1 Standard Signal
+
+* Symbol: XAUUSD
+* Signal Type: Normal
+* Direction: BUY / SELL
+* Entry
+* Stop Loss
+* TP1
+* TP2
+* Probability
+* Time Generated
+
+#### 9.2 ตัวอย่างข้อความ
+
+**XAUUSD Signal**
+BUY 4672
+SL 4666
+TP1 4679
+TP2 4688
+BUY win probability: 59%
+SELL win probability: 41%
+Timeframe Bias: H4 Up / M15 Pullback / M5 Entry
+
+#### 9.3 Urgent Signal
+
+ใช้เมื่อคะแนนเกิน threshold ที่กำหนด เช่น 70%
+เพื่อแจ้งเตือนแบบเร่งด่วน
+
+---
+
+### 10. โครงสร้างระบบระดับสูง
+
+#### 10.1 Frontend
+
+* Web Dashboard สำหรับ Admin และ User
+* Responsive design
+* ดูได้ทั้ง desktop และ mobile
+
+#### 10.2 Backend
+
+* REST API
+* Webhook endpoint
+* Authentication / Authorization
+* Business logic สำหรับวิเคราะห์สัญญาณ
+
+#### 10.3 Analysis Engine
+
+* Signal rules engine
+* Indicator computation service
+* Multi-timeframe aggregator
+* Probability scoring engine
+
+#### 10.4 Notification Service
+
+* Telegram sender
+* LINE sender
+* Retry queue
+* Delivery log
+
+#### 10.5 Database
+
+* Price snapshot
+* Signal history
+* Alert history
+* User settings
+* Performance statistics
+
+---
+
+### 11. โครงสร้างข้อมูลหลัก
+
+#### 11.1 ตาราง users
+
+* user_id
+* name
+* role
+* telegram_chat_id
+* line_user_id
+* is_active
+* created_at
+
+#### 11.2 ตาราง signal_history
+
+* signal_id
+* symbol
+* signal_type
+* direction
+* entry_price
+* stop_loss
+* take_profit_1
+* take_profit_2
+* buy_probability
+* sell_probability
+* timeframe_summary
+* generated_at
+* status
+
+#### 11.3 ตาราง webhook_logs
+
+* log_id
+* source
+* payload
+* received_at
+* process_status
+* error_message
+
+#### 11.4 ตาราง price_candles
+
+* candle_id
+* symbol
+* timeframe
+* open
+* high
+* low
+* close
+* volume
+* candle_time
+
+#### 11.5 ตาราง signal_results
+
+* result_id
+* signal_id
+* hit_tp1
+* hit_tp2
+* hit_sl
+* closed_at
+* final_result
+
+---
+
+### 12. API ระดับสูง
+
+#### 12.1 Webhook API
+
+**POST /api/webhook/tradingview**
+
+* รับข้อมูล alert จาก TradingView
+* Validate secret token
+* บันทึก log
+* Trigger analysis
+
+#### 12.2 Manual Analysis API
+
+**POST /api/analysis/run**
+
+* เรียกวิเคราะห์แบบ manual
+* รับ symbol และ timeframe set
+* ส่งผลลัพธ์กลับ
+
+#### 12.3 Signal Query API
+
+**GET /api/signals/latest**
+
+* ดึงสัญญาณล่าสุด
+
+**GET /api/signals/history**
+
+* ดึงประวัติการวิเคราะห์
+
+#### 12.4 Dashboard Stats API
+
+**GET /api/stats/performance**
+
+* สรุป win rate
+* risk/reward average
+* signal count
+
+---
+
+### 13. Non-Functional Requirements
+
+#### 13.1 Performance
+
+* ระบบต้องตอบสนองการรับ webhook ภายใน 3 วินาที
+* ส่ง notification ภายใน 5 วินาทีหลังวิเคราะห์เสร็จ
+* รองรับ concurrent webhook หลายรายการ
+
+#### 13.2 Availability
+
+* ระบบพร้อมใช้งาน 24x7
+* มี monitoring และ alert เมื่อ service ล่ม
+
+#### 13.3 Security
+
+* ใช้ HTTPS
+* มี Secret Key สำหรับ webhook
+* มี Authentication สำหรับ dashboard
+* เก็บ token แบบเข้ารหัส
+* จำกัดสิทธิ์ตาม role
+
+#### 13.4 Audit & Logging
+
+* บันทึก request log
+* บันทึก signal log
+* บันทึก error log
+* ตรวจสอบย้อนหลังได้
+
+---
+
+### 14. เทคโนโลยีแนะนำ
+
+#### Backend
+
+* Python FastAPI หรือ Node.js NestJS
+
+#### Analysis Engine
+
+* Python
+* Pandas / NumPy / TA-Lib หรือ library technical indicator
+
+#### Frontend
+
+* React / Next.js
+
+#### Database
+
+* PostgreSQL
+
+#### Queue / Async
+
+* Redis + Celery / BullMQ
+
+#### Notification
+
+* Telegram Bot API
+* LINE Messaging API
+
+#### Deployment
+
+* Docker
+* Nginx Reverse Proxy
+* Ubuntu Server / Cloud VM
+
+---
+
+### 15. แผนการพัฒนาเป็นระยะ
+
+#### Phase 1: MVP
+
+* รับ webhook
+* วิเคราะห์ rule-based พื้นฐาน
+* ส่ง Telegram
+* บันทึก signal history
+
+#### Phase 2: Enhanced Analysis
+
+* รองรับหลาย timeframe เต็มรูปแบบ
+* เพิ่ม scoring / probability
+* เพิ่ม Dashboard
+
+#### Phase 3: Advanced Automation
+
+* LINE integration
+* Backtest
+* Performance analytics
+* User setting per strategy
+
+#### Phase 4: AI Assisted Layer
+
+* AI สรุปเหตุผลของสัญญาณ
+* AI ปรับคำอธิบายเป็นภาษาธรรมชาติ
+* AI วิเคราะห์สถิติความแม่นยำของแต่ละกฎ
+
+---
+
+### 16. ความเสี่ยงของโครงการ
+
+* ความหน่วงของข้อมูลราคา
+* Alert จาก TradingView มาไม่ครบหรือมาช้า
+* Indicator lag ทำให้สัญญาณช้า
+* ความแม่นยำช่วงข่าวแรงต่ำลง
+* Overfitting ของกฎวิเคราะห์
+* ความต่างของราคาแต่ละ broker/feed
+
+---
+
+### 17. ข้อเสนอแนะในการเริ่มต้น
+
+เพื่อให้เริ่มเร็วและเห็นผลจริง ควรเริ่มจาก
+
+* Symbol เดียว: XAUUSD
+* Notification เดียว: Telegram
+* Strategy Mode 2 แบบ:
+
+  * Scalp
+  * Normal
+* Probability แบบ rule-based ก่อน
+* Dashboard แบบอ่านอย่างเดียวก่อน
+
+---
+
+### 18. Deliverables ที่ควรมีต่อจากเอกสารนี้
+
+1. Solution Architecture Diagram
+2. Database Schema Design
+3. API Specification
+4. Webhook Payload Specification
+5. Signal Scoring Rules
+6. Dashboard Wireframe
+7. Development Plan / Sprint Plan
+8. UAT Test Cases
+
+---
+
+### 19. สรุป
+
+ระบบนี้มีเป้าหมายเพื่อแปลงข้อมูลราคาและสัญญาณจาก TradingView ให้เป็นคำแนะนำการเทรดที่สรุปแล้ว พร้อมส่งอัตโนมัติถึงผู้ใช้งานแบบทันที โดยใช้แนวคิด multi-timeframe analysis, rule-based scoring, และ notification automation เป็นแกนหลัก และสามารถต่อยอดไปสู่ระบบวิเคราะห์เชิงลึกและบริการเชิงพาณิชย์ในอนาคตได้
